@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Neo-City 2099 - High-End 3D WebGPU Experience</title>
+  <meta name="description" content="Cinematic 3D Megacity with original human operative and original alien apex predator built with Three.js WebGPU.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  
+  <script type="module" crossorigin src="/assets/index-DZUv_-Yn.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BkLNlm-C.css">
+</head>
+<body>
+  <div id="app">
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+      <!-- Top Bar -->
+      <header class="hud-header">
+        <div class="brand-group">
+          <div class="logo-emblem"></div>
+          <div>
+            <h1 class="game-title">NEO-CITY 2099</h1>
+            <p class="subtitle">CIPHER-7 // VOR'KHYRA VOID-REAVER</p>
+          </div>
+        </div>
+
+        <!-- Entity Switcher -->
+        <div class="entity-toggle-group">
+          <button id="btn-entity-hero" class="entity-btn active">👤 CIPHER-7 (HUMAN)</button>
+          <button id="btn-entity-alien" class="entity-btn">👾 VOR'KHYRA (ALIEN)</button>
+        </div>
+
+        <div class="backend-badge-container">
+          <div id="renderer-badge" class="badge badge-initializing">
+            <span class="badge-dot"></span>
+            <span id="backend-name">INITIALIZING ENGINE...</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Left Telemetry Panel -->
+      <aside class="hud-panel telemetry-panel">
+        <div class="panel-header">
+          <span class="panel-icon">⚡</span>
+          <h2>BATTLEFIELD TELEMETRY</h2>
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <span class="stat-label">ACTIVE FOCUS</span>
+            <span id="stat-active-entity" class="stat-value highlight">CIPHER-7</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">HERO STATE</span>
+            <span id="stat-hero-state" class="stat-value">IDLE</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">ALIEN STATE</span>
+            <span id="stat-alien-state" class="stat-value highlight">IDLE</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">FRAMERATE</span>
+            <span id="stat-fps" class="stat-value highlight">-- FPS</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">GRAPHICS API</span>
+            <span id="stat-backend" class="stat-value">Detecting...</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">POLYGONS</span>
+            <span id="stat-triangles" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">DRAW CALLS</span>
+            <span id="stat-drawcalls" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">WEATHER STATE</span>
+            <span id="stat-weather" class="stat-value active">PRECIPITATION // WET</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right Controls Panel -->
+      <aside class="hud-panel controls-panel">
+        <div class="panel-header">
+          <span class="panel-icon">🎬</span>
+          <h2>DIRECTOR CONSOLE</h2>
+        </div>
+        <div class="panel-body">
+          <!-- Camera Mode -->
+          <div class="control-group">
+            <label class="control-title">CAMERAS</label>
+            <div class="button-group five-cols">
+              <button id="btn-cam-target" class="hud-btn active" data-mode="target">3rd-Person</button>
+              <button id="btn-cam-aerial" class="hud-btn" data-mode="aerial">Aerial</button>
+              <button id="btn-cam-street" class="hud-btn" data-mode="street">Street</button>
+              <button id="btn-cam-highway" class="hud-btn" data-mode="highway">Chase</button>
+              <button id="btn-cam-free" class="hud-btn" data-mode="free">Orbit</button>
+            </div>
+          </div>
+
+          <!-- Atmosphere & Lighting Presets -->
+          <div class="control-group">
+            <label class="control-title">ATMOSPHERE / TIME OF DAY</label>
+            <div class="button-group four-cols">
+              <button id="btn-atm-bladerunner" class="hud-btn active" data-preset="bladerunner">Rainy Night</button>
+              <button id="btn-atm-sunset" class="hud-btn" data-preset="sunset">Smog Sunset</button>
+              <button id="btn-atm-midnight" class="hud-btn" data-preset="midnight">Midnight</button>
+              <button id="btn-atm-dawn" class="hud-btn" data-preset="dawn">Cyber Dawn</button>
+            </div>
+          </div>
+
+          <!-- Weather & Simulation Toggles -->
+          <div class="control-group">
+            <label class="control-title">WEATHER & FX</label>
+            <div class="toggles-grid">
+              <button id="btn-toggle-rain" class="hud-toggle-btn active">RAIN: ACTIVE</button>
+              <button id="btn-toggle-steam" class="hud-toggle-btn active">STEAM VENTS: ON</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Combat & Movement Action Bar (Dual Hero & Alien Actions) -->
+      <div class="action-bar-container">
+        <div class="action-bar">
+          <!-- Human Actions -->
+          <div id="hero-actions" class="action-subgroup">
+            <button id="btn-act-attack" class="action-btn attack-btn" title="Left Click or F">
+              <span class="action-icon">⚔️</span>
+              <span class="action-label">SLASH [F]</span>
+            </button>
+            <button id="btn-act-dodge" class="action-btn" title="Q or E">
+              <span class="action-icon">⚡</span>
+              <span class="action-label">DODGE [Q/E]</span>
+            </button>
+            <button id="btn-act-slide" class="action-btn" title="Shift or C">
+              <span class="action-icon">🔽</span>
+              <span class="action-label">SLIDE [SHIFT]</span>
+            </button>
+            <button id="btn-act-jump" class="action-btn" title="Space">
+              <span class="action-icon">⬆️</span>
+              <span class="action-label">JUMP [SPACE]</span>
+            </button>
+          </div>
+
+          <!-- Alien Actions -->
+          <div id="alien-actions" class="action-subgroup">
+            <button id="btn-act-alien-strike" class="action-btn alien-strike-btn" title="F or Left Click">
+              <span class="action-icon">🌀</span>
+              <span class="action-label">VOID STRIKE [F]</span>
+            </button>
+            <button id="btn-act-alien-nova" class="action-btn alien-nova-btn" title="R or Space">
+              <span class="action-icon">💥</span>
+              <span class="action-label">GRAVITON NOVA [R]</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Status Bar -->
+      <footer class="hud-footer">
+        <div class="footer-tip">
+          <span class="glow-bullet">◆</span>
+          <span>[WASD] MOVE/PROWL | [F] ATTACK/VOID STRIKE | [R] GRAVITON NOVA | [SPACE] JUMP | [SHIFT] SLIDE | DRAG MOUSE TO LOOK</span>
+        </div>
+        <button id="btn-fullscreen" class="hud-btn mini">⛶ FULLSCREEN</button>
+      </footer>
+    </div>
+
+    <!-- Initial Loading Screen -->
+    <div id="loader-overlay" class="loader-overlay">
+      <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <div class="loader-brand">NEO-CITY 2099</div>
+        <div class="loader-status" id="loader-status">Assembling Vor'Khyra Chitin, Singularity Core & VFX...</div>
+        <div class="loader-bar-bg">
+          <div class="loader-bar-fill" id="loader-progress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
